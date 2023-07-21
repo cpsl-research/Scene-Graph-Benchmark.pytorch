@@ -14,7 +14,7 @@ start_docker () {
       --name sgg-benchmark \
       --privileged \
       --runtime=nvidia \
-      --gpus 'all,"capabilities=graphics,utility,display,video,compute"' \
+      --gpus 'all,"capabilities=graphics,utility,video,compute"' \
       -p 8080:8080 \
       -it \
       roshambo919/scenegraph:benchmark \
