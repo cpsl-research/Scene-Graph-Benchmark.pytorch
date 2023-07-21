@@ -9,7 +9,7 @@ RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/
 # install basics
 RUN apt-get update -y \
  && apt-get install -y apt-utils vim nano git curl ca-certificates bzip2 cmake tree htop bmon iotop g++ \
- && apt-get install -y libglib2.0-0 libsm6 libxext6 libxrender-dev ffmpeg libsm6 libxext6
+ && apt-get install -y libglib2.0-0 libsm6 libxext6 libxrender-dev ffmpeg libsm6 libxext6 libqt5gui5
 
 # Create a Python 3.8 environment
 RUN conda install -y conda-build ipython \

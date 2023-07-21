@@ -16,6 +16,8 @@ start_docker () {
       --runtime=nvidia \
       --gpus 'all,"capabilities=graphics,utility,video,compute"' \
       -p 8080:8080 \
+      -e DISPLAY=$DISPLAY \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
       -it \
       roshambo919/scenegraph:benchmark \
        /bin/bash
