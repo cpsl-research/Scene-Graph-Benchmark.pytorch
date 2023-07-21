@@ -2,10 +2,14 @@
 
 set -e 
 
+MODELFOLDER=${1:-/data/$(whoami)/models}
+
 xhost local:root
 
 # pull docker image
 docker pull roshambo919/scenegraph:benchmark
+
+DEST_TORCH_HOME=/workspace/models
 
 # function to start docker
 start_docker () {
@@ -17,6 +21,8 @@ start_docker () {
       --gpus 'all,"capabilities=graphics,utility,video,compute"' \
       -p 8080:8080 \
       -e DISPLAY=$DISPLAY \
+      -e TORCH_HOME=$DEST_TORCH_HOME \
+      --mount type=bind,src="$MODELFOLDER",target="$DEST_TORCH_HOME" \
       -v /tmp/.X11-unix:/tmp/.X11-unix \
       -it \
       roshambo919/scenegraph:benchmark \
