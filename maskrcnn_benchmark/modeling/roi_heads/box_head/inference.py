@@ -151,7 +151,7 @@ class PostProcessor(nn.Module):
         boxes = boxes.reshape(-1, 4)
         scores = scores.reshape(-1)
         boxlist = BoxList(boxes, image_shape, mode="xyxy")
-        boxlist.add_field("pred_scores", scores)
+        boxlist.add_field("scores", scores)
         return boxlist
 
     def filter_results(self, boxlist, num_classes):
@@ -162,7 +162,7 @@ class PostProcessor(nn.Module):
         # if we had multi-class NMS, we could perform this directly on the boxlist
         boxes = boxlist.bbox.reshape(-1, num_classes * 4)
         boxes_per_cls = boxlist.bbox.reshape(-1, num_classes, 4)
-        scores = boxlist.get_field("pred_scores").reshape(-1, num_classes)
+        scores = boxlist.get_field("scores").reshape(-1, num_classes)
 
         device = scores.device
         result = []
@@ -175,14 +175,14 @@ class PostProcessor(nn.Module):
             scores_j = scores[inds, j]
             boxes_j = boxes[inds, j * 4 : (j + 1) * 4]
             boxlist_for_class = BoxList(boxes_j, boxlist.size, mode="xyxy")
-            boxlist_for_class.add_field("pred_scores", scores_j)
+            boxlist_for_class.add_field("scores", scores_j)
             boxlist_for_class, keep = boxlist_nms(
-                boxlist_for_class, self.nms, max_proposals=self.post_nms_per_cls_topn, score_field='pred_scores'
+                boxlist_for_class, self.nms, max_proposals=self.post_nms_per_cls_topn, score_field='scores'
             )
             inds = inds[keep]
             num_labels = len(boxlist_for_class)
             boxlist_for_class.add_field(
-                "pred_labels", torch.full((num_labels,), j, dtype=torch.int64, device=device)
+                "labels", torch.full((num_labels,), j, dtype=torch.int64, device=device)
             )
             result.append(boxlist_for_class)
             orig_inds.append(inds)
@@ -206,8 +206,8 @@ class PostProcessor(nn.Module):
             labels_pre = labels_pre[final_inds]
 
             result = BoxList(boxes_per_cls[final_inds, labels_pre], boxlist.size, mode="xyxy")
-            result.add_field("pred_scores", scores_pre)
-            result.add_field("pred_labels", labels_pre)
+            result.add_field("scores", scores_pre)
+            result.add_field("labels", labels_pre)
             orig_inds = final_inds
         else:
             result = cat_boxlist(result)
@@ -216,7 +216,7 @@ class PostProcessor(nn.Module):
         number_of_detections = len(result)
         # Limit to max_per_image detections **over all classes**
         if number_of_detections > self.detections_per_img > 0:
-            cls_scores = result.get_field("pred_scores")
+            cls_scores = result.get_field("scores")
             image_thresh, _ = torch.kthvalue(
                 cls_scores.cpu(), number_of_detections - self.detections_per_img + 1
             )
