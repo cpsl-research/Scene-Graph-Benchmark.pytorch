@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:1.8.0-cuda11.1-cudnn8-devel
+FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-devel
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
@@ -16,24 +16,25 @@ RUN conda install -y conda-build ipython \
  && conda clean -ya \
  && pip install requests ninja yacs cython matplotlib opencv-python tqdm h5py
 
-# Install TorchVision master
-RUN git clone https://github.com/pytorch/vision.git \
- && cd vision \
- && git fetch --all --tags --force \
- && git checkout tags/v0.9.0 -b v0.9.0-branch \
- && python setup.py install
-
-# install pycocotools
-RUN git clone https://github.com/cocodataset/cocoapi.git \
- && cd cocoapi/PythonAPI \
- && python setup.py build_ext install
-
 # install apex
 RUN git clone https://github.com/NVIDIA/apex.git \
  && cd apex \
  && git fetch --all --tags --force \
  && git checkout tags/22.03 -b v22.03-branch \
  && python setup.py install --cuda_ext --cpp_ext
+
+# Install TorchVision master
+RUN git clone https://github.com/pytorch/vision.git \
+ && cd vision \
+ && git fetch --all --tags --force \
+ && git checkout tags/v0.9.1 -b v0.9.1-branch \
+ && python setup.py install
+
+# install pycocotools
+# RUN git clone https://github.com/cocodataset/cocoapi.git \
+RUN git clone  https://github.com/ppwwyyxx/cocoapi.git \
+ && cd cocoapi/PythonAPI \
+ && python setup.py build_ext install
 
 # install PyTorch Detection
 ARG FORCE_CUDA="1"

@@ -2,7 +2,11 @@
 
 set -e 
 
-MODELFOLDER=${1:-/data/$(whoami)/models}
+DATAFOLDER=${1:-/data/$(whoami)/}
+MODELFOLDER=${2:-/data/$(whoami)/models/scenegraph}
+
+DATAFOLDER=${DATAFOLDER%/}  # remove trailing slash
+MODELFOLDER=${MODELFOLDER%/}  # remove trailing slash
 
 xhost local:root
 
@@ -10,6 +14,7 @@ xhost local:root
 docker pull roshambo919/scenegraph:benchmark
 
 DEST_TORCH_HOME=/workspace/models
+DEST_DATA_HOME=/workspace/data
 
 # function to start docker
 start_docker () {
@@ -22,13 +27,15 @@ start_docker () {
       -p 8080:8080 \
       -e DISPLAY=$DISPLAY \
       -e TORCH_HOME=$DEST_TORCH_HOME \
+      --mount type=bind,src="$DATAFOLDER",target=/workspace/data \
       --mount type=bind,src="$MODELFOLDER",target="$DEST_TORCH_HOME" \
+      --memory="16g" \
+      --shm-size=16gb \
       -v /tmp/.X11-unix:/tmp/.X11-unix \
       -it \
       roshambo919/scenegraph:benchmark \
        /bin/bash
 }
-
 
 # Remove if there is existing container
 CONT_ID=$(docker ps -aqf "name=^sgg-benchmark")

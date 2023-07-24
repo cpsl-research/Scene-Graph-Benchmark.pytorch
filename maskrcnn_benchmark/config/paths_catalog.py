@@ -6,8 +6,7 @@ import copy
 
 
 class DatasetCatalog(object):
-    #DATA_DIR = "/home/users/alatif/data/ImageCorpora/"
-    DATA_DIR = "/media/rafi/Samsung_T5/_DATASETS/"
+    DATA_DIR = "/workspace/data"
     DATASETS = {
         "coco_2017_train": {
             "img_dir": "coco/train2017",
@@ -107,13 +106,13 @@ class DatasetCatalog(object):
             "ann_file": "cityscapes/annotations/instancesonly_filtered_gtFine_test.json"
         },
         "VG_stanford_filtered": {
-            "img_dir": "vg/VG_100K",
+            "img_dir": "vg/Images/VG_100K",
             "roidb_file": "vg/VG-SGG.h5",
             "dict_file": "vg/VG-SGG-dicts.json",
             "image_file": "vg/image_data.json",
         },
         "VG_stanford_filtered_with_attribute": {
-            "img_dir": "vg/VG_100K",
+            "img_dir": "vg/Images/VG_100K",
             "roidb_file": "vg/VG-SGG-with-attri.h5",
             "dict_file": "vg/VG-SGG-dicts-with-attri.json",
             "image_file": "vg/image_data.json",
