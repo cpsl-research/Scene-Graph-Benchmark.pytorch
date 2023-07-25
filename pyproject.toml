@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "sgbench"
+name = "maskrcnn_benchmark"
 version = "0.1.0-alpha.1"
 description = "Scene graph benchmark"
 authors = ["Spencer Hallyburton <spencer.hallyburton@duke.edu>", "Kaihua Tang", "Facebook"]
@@ -11,6 +11,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
 ]
+packages = [{include = "maskrcnn_benchmark"}]
 
 [tool.poetry.dependencies]
 python = "~3.8"

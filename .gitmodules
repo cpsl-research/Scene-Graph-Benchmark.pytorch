@@ -1,3 +1,0 @@
-[submodule "third_party/maskrcnn-benchmark"]
-	path = third_party/maskrcnn-benchmark
-	url = https://github.com/cpsl-research/maskrcnn-benchmark.git
