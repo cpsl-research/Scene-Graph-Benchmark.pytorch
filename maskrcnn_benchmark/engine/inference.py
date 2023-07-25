@@ -16,12 +16,15 @@ from ..utils.timer import Timer, get_time_str
 from .bbox_aug import im_detect_bbox_aug
 
 
-def compute_on_dataset(model, data_loader, device, synchronize_gather=True, timer=None):
+def compute_on_dataset(model, data_loader, device, n_max=None, synchronize_gather=True, timer=None):
     model.eval()
     results_dict = {}
     cpu_device = torch.device("cpu")
     torch.cuda.empty_cache()
-    for _, batch in enumerate(tqdm(data_loader)):
+    n_total = len(data_loader) if n_max is None else min(len(data_loader), n_max)
+    for i_img, batch in enumerate(tqdm(data_loader, total=n_total)):
+        if i_img > n_total:
+            break
         with torch.no_grad():
             images, targets, image_ids = batch
             targets = [target.to(device) for target in targets]
@@ -92,6 +95,7 @@ def inference(
         expected_results_sigma_tol=4,
         output_folder=None,
         logger=None,
+        n_max=None,
 ):
     load_prediction_from_cache = cfg.TEST.ALLOW_LOAD_FROM_CACHE and output_folder is not None and os.path.exists(os.path.join(output_folder, "eval_results.pytorch"))
     # convert to a torch.device for efficiency
@@ -107,7 +111,8 @@ def inference(
     if load_prediction_from_cache:
         predictions = torch.load(os.path.join(output_folder, "eval_results.pytorch"), map_location=torch.device("cpu"))['predictions']
     else:
-        predictions = compute_on_dataset(model, data_loader, device, synchronize_gather=cfg.TEST.RELATION.SYNC_GATHER, timer=inference_timer)
+        predictions = compute_on_dataset(model, data_loader, device, n_max=n_max,
+                                         synchronize_gather=cfg.TEST.RELATION.SYNC_GATHER, timer=inference_timer)
     # wait for all processes to complete before measuring the time
     synchronize()
     total_time = total_timer.toc()
@@ -143,6 +148,7 @@ def inference(
     )
 
     if cfg.TEST.CUSTUM_EVAL:
+        logger.info("Postprocessing scene graphs")
         detected_sgg = custom_sgg_post_precessing(predictions)
         with open(os.path.join(cfg.DETECTED_SGG_DIR, 'custom_prediction.json'), 'w') as outfile:  
             json.dump(detected_sgg, outfile)
@@ -160,7 +166,7 @@ def inference(
 
 def custom_sgg_post_precessing(predictions):
     output_dict = {}
-    for idx, boxlist in enumerate(predictions):
+    for idx, boxlist in tqdm(enumerate(predictions), total=len(predictions)):
         xyxy_bbox = boxlist.convert('xyxy').bbox
         # current sgg info
         current_dict = {}

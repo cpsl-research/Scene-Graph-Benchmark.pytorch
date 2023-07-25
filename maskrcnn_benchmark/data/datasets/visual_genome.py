@@ -3,7 +3,7 @@ import sys
 import torch
 import h5py
 import json
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import numpy as np
 from collections import defaultdict
 from tqdm import tqdm
@@ -117,9 +117,13 @@ class VGDataset(torch.utils.data.Dataset):
         self.img_info = []
         if os.path.isdir(path):
             for file_name in tqdm(os.listdir(path)):
-                self.custom_files.append(os.path.join(path, file_name))
-                img = Image.open(os.path.join(path, file_name)).convert("RGB")
-                self.img_info.append({'width':int(img.width), 'height':int(img.height)})
+                try:
+                    img = Image.open(os.path.join(path, file_name)).convert("RGB")
+                except UnidentifiedImageError:
+                    continue
+                else:
+                    self.custom_files.append(os.path.join(path, file_name))
+                    self.img_info.append({'width':int(img.width), 'height':int(img.height)})
         # Expecting a list of paths in a json file
         if os.path.isfile(path):
             file_list = json.load(open(path))

@@ -18,10 +18,10 @@ from maskrcnn_benchmark.utils.logger import setup_logger
 from maskrcnn_benchmark.utils.miscellaneous import mkdir
 
 # Check if we can enable mixed-precision via apex.amp
-try:
-    from apex import amp
-except ImportError:
-    raise ImportError('Use APEX for mixed precision via apex.amp')
+# try:
+#     from apex import amp
+# except ImportError:
+#     raise ImportError('Use APEX for mixed precision via apex.amp')
 
 
 def main():
@@ -33,6 +33,7 @@ def main():
         help="path to config file",
     )
     parser.add_argument("--local_rank", type=int, default=0)
+    parser.add_argument("--n_max", default=None, type=int, help="Max number of images to do inference on")
     parser.add_argument(
         "opts",
         help="Modify config options using the command-line",
@@ -68,8 +69,8 @@ def main():
     model.to(cfg.MODEL.DEVICE)
 
     # Initialize mixed-precision if necessary
-    use_mixed_precision = cfg.DTYPE == 'float16'
-    amp_handle = amp.init(enabled=use_mixed_precision, verbose=cfg.AMP_VERBOSE)
+    # use_mixed_precision = cfg.DTYPE == 'float16'
+    # amp_handle = amp.init(enabled=use_mixed_precision, verbose=cfg.AMP_VERBOSE)
 
     output_dir = cfg.OUTPUT_DIR
     checkpointer = DetectronCheckpointer(cfg, model, save_dir=output_dir)
@@ -108,6 +109,7 @@ def main():
             cfg,
             model,
             data_loader_val,
+            n_max=args.n_max,
             dataset_name=dataset_name,
             iou_types=iou_types,
             box_only=False if cfg.MODEL.RETINANET_ON else cfg.MODEL.RPN_ONLY,
