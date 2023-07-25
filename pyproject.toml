@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "sgbench"
+version = "0.1.0-alpha.1"
+description = "Scene graph benchmark"
+authors = ["Spencer Hallyburton <spencer.hallyburton@duke.edu>", "Kaihua Tang", "Facebook"]
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/cpsl-research/Scene-Graph-Benchmark.pytorch/"
+keywords = ["scene graph", "neuro-symbolic"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+]
+
+[tool.poetry.dependencies]
+python = "~3.8"
+numpy = ">=1.20, <1.24"
+opencv-python = ">=4.3, <4.7"
+torch = { url = "https://download.pytorch.org/whl/cu113/torch-1.10.0%2Bcu113-cp38-cp38-linux_x86_64.whl" }
+torchvision = { url = "https://download.pytorch.org/whl/cu113/torchvision-0.11.0%2Bcu113-cp38-cp38-linux_x86_64.whl" }
+pycocotools = "^2.0.6"
+yacs = "^0.1.8"
+tqdm = "^4"
+scipy = "^1.9"
+h5py = "^3.9.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7"
+pytest-cov = "^4"
+bandit = "^1.7"
+black = "~22.12.0"
+mypy = "^0"
+isort = "^5.11"
+flake8 = "^5.0"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q -s"
+testpaths = [
+    "tests",
+    "integration",
+]
+
+[build-system]
+requires = [
+    "poetry-core",
+]
+build-backend = "poetry.core.masonry.api"
