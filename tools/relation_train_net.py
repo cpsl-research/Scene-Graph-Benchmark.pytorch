@@ -158,6 +158,7 @@ def train(cfg, local_rank, distributed, logger):
         # Otherwise apply loss scaling for mixed-precision recipe
         # with amp.scale_loss(losses, optimizer) as scaled_losses:
         #     scaled_losses.backward()
+        losses.backward()
         
         # add clip_grad_norm from MOTIFS, tracking gradient, used for debug
         verbose = (iteration % cfg.SOLVER.PRINT_GRAD_FREQ) == 0 or print_first_grad # print grad or not

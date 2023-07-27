@@ -1,5 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
+import logging
 
 
 class Matcher(object):
@@ -39,7 +40,7 @@ class Matcher(object):
         self.low_threshold = low_threshold
         self.allow_low_quality_matches = allow_low_quality_matches
 
-    def __call__(self, match_quality_matrix):
+    def __call__(self, match_quality_matrix, error_on_no_objects=False):
         """
         Args:
             match_quality_matrix (Tensor[float]): an MxN tensor, containing the
@@ -57,9 +58,11 @@ class Matcher(object):
                     "No ground-truth boxes available for one of the images "
                     "during training")
             else:
-                raise ValueError(
-                    "No proposal boxes available for one of the images "
-                    "during training")
+                msg =  "No proposal boxes available for one of the images during training"
+                if error_on_no_objects:
+                    raise ValueError(msg)
+                else:
+                    logging.warning(msg)
 
         # match_quality_matrix is M (gt) x N (predicted)
         # Max over gt elements (dim 0) to find best gt candidate for each prediction

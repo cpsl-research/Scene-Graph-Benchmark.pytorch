@@ -2,6 +2,7 @@ import cv2
 import copy
 import torch
 import numpy as np
+import logging
 from maskrcnn_benchmark.layers.misc import interpolate
 from maskrcnn_benchmark.utils import cv2_util
 import pycocotools.mask as mask_utils
@@ -459,7 +460,12 @@ class PolygonList(object):
                 item = item.squeeze(1) if item.numel() > 0 else item
                 item = item.tolist()
             for i in item:
-                selected_polygons.append(self.polygons[i])
+                try:
+                    poly = self.polygons[i]
+                except IndexError as e:
+                    logging.warning('could not get polygon for this object')
+                    poly = PolygonInstance([[]], [0])
+                selected_polygons.append(poly)
         return PolygonList(selected_polygons, size=self.size)
 
     def __iter__(self):

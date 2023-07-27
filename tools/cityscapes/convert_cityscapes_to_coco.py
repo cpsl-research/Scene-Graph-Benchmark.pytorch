@@ -29,7 +29,7 @@ import os
 import scipy.misc
 import sys
 
-import cityscapesscripts.evaluation.instances2dict_with_polygons as cs
+import instances2dict_with_polygons as cs
 
 
 def parse_args():
@@ -125,9 +125,9 @@ def convert_cityscapes_instance_only(
         # 'gtCoarse_train_extra'
     ]
     ann_dirs = [
-        'gtFine_trainvaltest/gtFine/val',
-        'gtFine_trainvaltest/gtFine/train',
-        'gtFine_trainvaltest/gtFine/test',
+        'gtFine/val',
+        'gtFine/train',
+        'gtFine/test',
 
         # 'gtCoarse/train',
         # 'gtCoarse/train_extra',
@@ -168,32 +168,33 @@ def convert_cityscapes_instance_only(
                     image = {}
                     image['id'] = img_id
                     img_id += 1
-
                     image['width'] = json_ann['imgWidth']
                     image['height'] = json_ann['imgHeight']
-                    image['file_name'] = filename[:-len(
-                        ends_in % data_set.split('_')[0])] + 'leftImg8bit.png'
-                    image['seg_file_name'] = filename[:-len(
+                    image['file_name'] = os.path.join(root, filename[:-len(
+                        ends_in % data_set.split('_')[0])] + 'gtFine_color.png')
+                    image['seg_file_name'] = os.path.join(root, filename[:-len(
                         ends_in % data_set.split('_')[0])] + \
-                        '%s_instanceIds.png' % data_set.split('_')[0]
+                        '%s_instanceIds.png' % data_set.split('_')[0])
                     images.append(image)
-
-                    fullname = os.path.join(root, image['seg_file_name'])
+                    # fullname = os.path.join(root, image['seg_file_name'])
+                    fullname = image['seg_file_name']
+                    assert os.path.exists(image['file_name']), image['file_name']
+                    assert os.path.exists(fullname), fullname
                     objects = cs.instances2dict_with_polygons(
                         [fullname], verbose=False)[fullname]
 
                     for object_cls in objects:
                         if object_cls not in category_instancesonly:
                             continue  # skip non-instance categories
-
+                        
                         for obj in objects[object_cls]:
                             if obj['contours'] == []:
-                                print('Warning: empty contours.')
+                                # print('Warning: empty contours.')
                                 continue  # skip non-instance categories
 
                             len_p = [len(p) for p in obj['contours']]
                             if min(len_p) <= 4:
-                                print('Warning: invalid contours.')
+                                # print('Warning: invalid contours.')
                                 continue  # skip non-instance categories
 
                             ann = {}
@@ -212,6 +213,7 @@ def convert_cityscapes_instance_only(
                             xyxy_box = poly_to_box(ann['segmentation'])
                             xywh_box = xyxy_to_xywh(xyxy_box)
                             ann['bbox'] = xywh_box
+                            ann['attributes'] = []
 
                             annotations.append(ann)
 

@@ -10,7 +10,7 @@ from .inference import make_roi_mask_post_processor
 from .loss import make_roi_mask_loss_evaluator
 
 
-def keep_only_positive_boxes(boxes):
+def keep_only_positive_boxes(boxes, enable=True):
     """
     Given a set of BoxList containing the `labels` field,
     return a set of BoxList for which `labels > 0`.
@@ -25,11 +25,15 @@ def keep_only_positive_boxes(boxes):
     positive_inds = []
     num_boxes = 0
     for boxes_per_image in boxes:
-        labels = boxes_per_image.get_field("labels")
-        inds_mask = labels > 0
-        inds = inds_mask.nonzero().squeeze(1)
-        positive_boxes.append(boxes_per_image[inds])
-        positive_inds.append(inds_mask)
+        if enable:
+            labels = boxes_per_image.get_field("labels")
+            inds_mask = labels > 0
+            inds = inds_mask.nonzero().squeeze(1)
+            positive_boxes.append(boxes_per_image[inds])
+            positive_inds.append(inds_mask)
+        else:
+            positive_boxes.append(boxes_per_image)
+            positive_inds.append(labels >= 0)
     return positive_boxes, positive_inds
 
 
@@ -62,7 +66,7 @@ class ROIMaskHead(torch.nn.Module):
         if self.training:
             # during training, only focus on positive boxes
             all_proposals = proposals
-            proposals, positive_inds = keep_only_positive_boxes(proposals)
+            proposals, positive_inds = keep_only_positive_boxes(proposals, enable=True)
         if self.training and self.cfg.MODEL.ROI_MASK_HEAD.SHARE_BOX_FEATURE_EXTRACTOR:
             x = features
             x = x[torch.cat(positive_inds, dim=0)]

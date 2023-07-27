@@ -1,6 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
 import torchvision
+import numpy as np
 
 from maskrcnn_benchmark.structures.bounding_box import BoxList
 from maskrcnn_benchmark.structures.segmentation_mask import SegmentationMask
@@ -80,6 +81,7 @@ class COCODataset(torchvision.datasets.coco.CocoDetection):
         classes = [self.json_category_id_to_contiguous_id[c] for c in classes]
         classes = torch.tensor(classes)
         target.add_field("labels", classes)
+        target.add_field("attributes", torch.from_numpy(np.array([[]]*len(classes))))
 
         if anno and "segmentation" in anno[0]:
             masks = [obj["segmentation"] for obj in anno]
@@ -90,7 +92,7 @@ class COCODataset(torchvision.datasets.coco.CocoDetection):
             keypoints = [obj["keypoints"] for obj in anno]
             keypoints = PersonKeypoints(keypoints, img.size)
             target.add_field("keypoints", keypoints)
-
+        
         target = target.clip_to_image(remove_empty=True)
 
         if self._transforms is not None:
