@@ -3,6 +3,10 @@ import torch
 import logging
 
 
+class ProposalBoxError(Exception):
+    pass
+
+
 class Matcher(object):
     """
     This class assigns to each predicted "element" (e.g., a box) a ground-truth
@@ -40,7 +44,7 @@ class Matcher(object):
         self.low_threshold = low_threshold
         self.allow_low_quality_matches = allow_low_quality_matches
 
-    def __call__(self, match_quality_matrix, error_on_no_objects=False):
+    def __call__(self, match_quality_matrix, error_on_no_objects=True):
         """
         Args:
             match_quality_matrix (Tensor[float]): an MxN tensor, containing the
@@ -58,9 +62,9 @@ class Matcher(object):
                     "No ground-truth boxes available for one of the images "
                     "during training")
             else:
-                msg =  "No proposal boxes available for one of the images during training"
+                msg = "No proposal boxes available for one of the images during training - " + str(match_quality_matrix.shape)
                 if error_on_no_objects:
-                    raise ValueError(msg)
+                    raise ProposalBoxError(msg)
                 else:
                     logging.warning(msg)
 

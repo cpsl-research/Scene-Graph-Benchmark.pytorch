@@ -51,7 +51,8 @@ class VGDataset(torch.utils.data.Dataset):
 
         self.ind_to_classes, self.ind_to_predicates, self.ind_to_attributes = load_info(dict_file) # contiguous 151, 51 containing __background__
         self.categories = {i : self.ind_to_classes[i] for i in range(len(self.ind_to_classes))}
-
+        
+        print(dict_file)
         self.custom_eval = custom_eval
         if self.custom_eval:
             self.get_custom_imgs(custom_path)
